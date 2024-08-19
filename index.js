@@ -1,10 +1,8 @@
-import { View, Button, StyleSheet, TextInput, Alert, FlatList,  } from 'react-native';
+import { View, Button, StyleSheet, TextInput, Alert, FlatList } from 'react-native';
 import { useState } from 'react';
 import { usarBD } from './hooks/usarBD';
 import { Produto } from './components/produto';
-import React, { useEffect} from 'react';
-
-
+import React, { useEffect } from 'react';
 
 export function Index() {
     const [id, setId] = useState('');
@@ -12,6 +10,7 @@ export function Index() {
     const [quantidade, setQuantidade] = useState('');
     const [pesquisa, setPesquisa] = useState('');
     const [produtos, setProdutos] = useState([]);
+    const [selectedId, setSelectedId] = useState(null); // Estado para controlar o produto selecionado
 
     const produtosBD = usarBD();
 
@@ -34,10 +33,10 @@ export function Index() {
 
     async function listar() {
         try {
-            const captura = await produtosBD.read(pesquisa)
-            setProdutos(captura)
+            const captura = await produtosBD.read(pesquisa);
+            setProdutos(captura);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 
@@ -54,18 +53,27 @@ export function Index() {
         }
     };
 
+    const selecionarProduto = (id) => {
+        setSelectedId(id); // Define o ID do produto selecionado
+    };
+
     return (
         <View style={styles.container}>
             <TextInput style={styles.texto} placeholder="Nome" onChangeText={setNome} value={nome} />
             <TextInput style={styles.texto} placeholder="Quantidade" onChangeText={setQuantidade} value={quantidade} />
             <Button title="Salvar" onPress={create} />
-            <TextInput style={styles.texto} placeholder="Pesquisar" onChangeText={setPesquisa}/>
+            <TextInput style={styles.texto} placeholder="Pesquisar" onChangeText={setPesquisa} />
             <FlatList
                 contentContainerStyle={styles.listContent}
                 data={produtos}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({ item }) => (
-                    <Produto data={item} onDelete={() => remove(item.id)} /> 
+                    <Produto
+                        data={item}
+                        onPress={() => selecionarProduto(item.id)}
+                        isSelected={item.id === selectedId} // Passa a informação se o item está selecionado
+                        onDelete={() => remove(item.id)}
+                    />
                 )}
             />
         </View>
