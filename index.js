@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { usarBD } from './hooks/usarBD';
 import { Produto } from './components/produto';
 import React, { useEffect } from 'react';
-
+    
 export function Index() {
     const [id, setId] = useState('');
     const [nome, setNome] = useState('');
