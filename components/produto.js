@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     selectedContainer: {
-        borderColor: "#007BFF", // cor da borda ao selecionar
+        borderColor: "#007BFF",
         borderWidth: 2,
     },
     text: {

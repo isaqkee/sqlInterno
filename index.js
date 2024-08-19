@@ -14,17 +14,30 @@ export function Index() {
 
     const produtosBD = usarBD();
 
-    async function create() {
+    async function createOrUpdate() {
         if (isNaN(quantidade)) {
             return Alert.alert('Quantidade', 'A quantidade precisa ser um número!');
         }
+
         try {
-            const item = await produtosBD.create({
-                nome,
-                quantidade: Number(quantidade),
-            });
-            Alert.alert('Produto cadastrado com o ID: ' + item.idProduto);
-            setId(item.idProduto);
+            if (selectedId) {
+                // Se há um ID selecionado, atualizamos o produto existente
+                await produtosBD.update({
+                    id: selectedId,
+                    nome,
+                    quantidade: Number(quantidade),
+                });
+                Alert.alert('Produto atualizado com sucesso!');
+            } else {
+                // Caso contrário, criamos um novo produto
+                const item = await produtosBD.create({
+                    nome,
+                    quantidade: Number(quantidade),
+                });
+                Alert.alert('Produto cadastrado com o ID: ' + item.idProduto);
+                setId(item.idProduto);
+            }
+            limparCampos();
             listar();
         } catch (error) {
             console.log(error);
@@ -40,6 +53,12 @@ export function Index() {
         }
     }
 
+    const limparCampos = () => {
+        setNome('');
+        setQuantidade('');
+        setSelectedId(null);
+    };
+
     useEffect(() => {
         listar();
     }, [pesquisa]);
@@ -53,15 +72,17 @@ export function Index() {
         }
     };
 
-    const selecionarProduto = (id) => {
-        setSelectedId(id); // Define o ID do produto selecionado
+    const selecionarProduto = (produto) => {
+        setSelectedId(produto.id); // Define o ID do produto selecionado
+        setNome(produto.nome); // Preenche o campo "Nome"
+        setQuantidade(String(produto.quantidade)); // Preenche o campo "Quantidade"
     };
 
     return (
         <View style={styles.container}>
             <TextInput style={styles.texto} placeholder="Nome" onChangeText={setNome} value={nome} />
             <TextInput style={styles.texto} placeholder="Quantidade" onChangeText={setQuantidade} value={quantidade} />
-            <Button title="Salvar" onPress={create} />
+            <Button title={selectedId ? "Atualizar" : "Salvar"} onPress={createOrUpdate} />
             <TextInput style={styles.texto} placeholder="Pesquisar" onChangeText={setPesquisa} />
             <FlatList
                 contentContainerStyle={styles.listContent}
@@ -70,8 +91,8 @@ export function Index() {
                 renderItem={({ item }) => (
                     <Produto
                         data={item}
-                        onPress={() => selecionarProduto(item.id)}
-                        isSelected={item.id === selectedId} // Passa a informação se o item está selecionado
+                        onPress={() => selecionarProduto(item)} // Carrega os dados do produto selecionado
+                        isSelected={item.id === selectedId}
                         onDelete={() => remove(item.id)}
                     />
                 )}

@@ -23,6 +23,7 @@ export function usarBD() {
             await regras.finalizeAsync();
         }
     }
+
     async function read(nome) {
         try {
             const consulta = "SELECT * FROM produtos WHERE nome LIKE ?";
@@ -33,6 +34,24 @@ export function usarBD() {
         }
     }
 
+    async function update(dados) {
+        const regras = await bd.prepareAsync(
+            "UPDATE produtos SET nome = $nome, quantidade = $quantidade WHERE id = $id"
+        );
+
+        try {
+            await regras.executeAsync({
+                $nome: dados.nome,
+                $quantidade: dados.quantidade,
+                $id: dados.id,
+            });
+        } catch (error) {
+            throw error;
+        } finally {
+            await regras.finalizeAsync();
+        }
+    }
+
     async function remove(id) {
         try {
             await bd.execAsync("DELETE FROM produtos WHERE id = " + id);
@@ -40,5 +59,6 @@ export function usarBD() {
             throw error;
         }
     }
-    return { create, read, remove }
+
+    return { create, read, update, remove };
 }
